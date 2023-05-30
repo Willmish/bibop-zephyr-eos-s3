@@ -7,6 +7,10 @@
 # guiconfig (GUI).
 
 menu "Zephyr"
+
+config USB_DEVICE_PID
+    default USB_PID_CONSOLE_SAMPLE
+
 source "Kconfig.zephyr"
 endmenu
 

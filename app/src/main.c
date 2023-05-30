@@ -1,46 +1,37 @@
 /*
- * Copyright (c) 2021 Nordic Semiconductor ASA
+ * Copyright (c) 2023 Jakub Duchniewicz
  * SPDX-License-Identifier: Apache-2.0
  */
 
 #include <zephyr/kernel.h>
-#include <zephyr/drivers/sensor.h>
+#include <sys/printk.h>
+#include <sys/util.h>
+#include <string.h>
+#include <usb/usb_device.h>
+#include <drivers/uart.h>
 
 #include "app_version.h"
 
-#include <zephyr/logging/log.h>
-LOG_MODULE_REGISTER(main, CONFIG_APP_LOG_LEVEL);
+BUILD_ASSERT(DT_NODE_HAS_COMPAT(DT_CHOSEN(zephyr_console), zephyr_cdc_acm_uart),
+        "Console device is not ACM CDC UART device");
+
 
 int main(void)
 {
-	int ret;
-	const struct device *sensor;
+    const struct device *usb_dev = DEVICE_DT_GET(DT_CHOSEN(zephyr_console));
+    uint32_t dtr = 0;
 
-	printk("Zephyr Example Application %s\n", APP_VERSION_STR);
+    if (usb_enable(NULL)) {
+        return;
+    }
 
-	sensor = DEVICE_DT_GET(DT_NODELABEL(examplesensor0));
-	if (!device_is_ready(sensor)) {
-		LOG_ERR("Sensor not ready");
-		return 0;
-	}
+    while (!dtr) {
+        uart_line_ctrl_get(usb_dev, UART_LINE_CTRL_DTR, &dtr);
+        k_sleep(K_MSEC(100));
+    }
 
 	while (1) {
-		struct sensor_value val;
-
-		ret = sensor_sample_fetch(sensor);
-		if (ret < 0) {
-			LOG_ERR("Could not fetch sample (%d)", ret);
-			return 0;
-		}
-
-		ret = sensor_channel_get(sensor, SENSOR_CHAN_PROX, &val);
-		if (ret < 0) {
-			LOG_ERR("Could not get sample (%d)", ret);
-			return 0;
-		}
-
-		printk("Sensor value: %d\n", val.val1);
-
+        printk("Hello USB Console...\n");
 		k_sleep(K_MSEC(1000));
 	}
 
