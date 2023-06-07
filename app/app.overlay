@@ -5,14 +5,18 @@
  */
 
 / {
-	chosen {
-		zephyr,console = &cdc_acm_uart0;
-	};
+    chosen {
+        zephyr,console = &uart1;
+        zephyr,shell-uart = &uart1;
+        zephyr,uart-pipe = &uart1;
+    };
 };
 
-&zephyr_udc0 {
-	cdc_acm_uart0: cdc_acm_uart0 {
-		compatible = "zephyr,cdc-acm-uart";
-		label = "CDC_ACM_0";
-	};
+&uart0 {
+        status = "disabled";
+};
+
+&uart1 {
+        status = "okay";
+        current-speed = <115200>;
 };
