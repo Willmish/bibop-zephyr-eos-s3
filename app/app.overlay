@@ -4,19 +4,3 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/ {
-    chosen {
-        zephyr,console = &uart1;
-        zephyr,shell-uart = &uart1;
-        zephyr,uart-pipe = &uart1;
-    };
-};
-
-&uart0 {
-        status = "disabled";
-};
-
-&uart1 {
-        status = "okay";
-        current-speed = <115200>;
-};
