@@ -11,7 +11,9 @@
 #include <zephyr/device.h>
 #include <stdio.h>
 
-#include "app_version.h"
+#include "eoss3_hal_i2c.h"
+
+//#include "app_version.h"
 
 
 /* 1000 msec = 1 sec */
@@ -80,9 +82,17 @@ static void trigger_handler(const struct device *dev,
 }
 #endif
 
+I2C_Config i2c0config =
+{
+    .eI2CFreq = I2C_400KHZ,
+    .eI2CInt = I2C_DISABLE,
+    .ucI2Cn = 0
+};
+
 int main(void)
 {
 	int ret;
+    HAL_StatusTypeDef hal_status;
 
 	if (!gpio_is_ready_dt(&led)) {
 		return 0;
@@ -92,15 +102,22 @@ int main(void)
 	if (ret < 0) {
 		return 0;
 	}
+    printk("Initialising I2C..\n");
+    hal_status = HAL_I2C_Init(i2c0config);
+    if (!hal_status) {
+        printk("Failed to initialise I2C HAL interface! %x\n", hal_status);
+        return 0;
+    }
+
 
 	const struct device *const sensor = DEVICE_DT_GET_ANY(st_lis2dh);
 
 	if (sensor == NULL) {
-		printf("No device found\n");
+		printk("No device found\n");
 		return 0;
 	}
 	if (!device_is_ready(sensor)) {
-		printf("Device %s is not ready\n", sensor->name);
+		printk("Device %s is not ready\n", sensor->name);
 		return 0;
 	}
 
