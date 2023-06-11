@@ -132,7 +132,8 @@ HAL_StatusTypeDef HAL_I2C_SetClockFreq(UINT32_t uiClkFreq)
     UINT32_t uiClock, uiPrescale;
     UINT8_t val;
    //Set the frequency
-    uiClock = S3x_Clk_Get_Rate(S3X_FFE_X1_CLK);
+    //uiClock = S3x_Clk_Get_Rate(S3X_FFE_X1_CLK); // TODO: FIX - add CLOCK rate getting function
+    uiClock = 10000;
 
     // Program prescale value
 #if 1 //use new formula to compute    

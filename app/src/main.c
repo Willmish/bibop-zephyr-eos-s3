@@ -12,6 +12,7 @@
 #include <stdio.h>
 
 #include "eoss3_hal_i2c.h"
+#include "eoss3_hal_gpio.h"
 
 //#include "app_version.h"
 
@@ -21,6 +22,13 @@
 
 /* The devicetree node identifier for the "led0" alias. */
 #define LED0_NODE DT_ALIAS(led0)
+/* The devicetree node indentrifier for the "button0" alias */
+#define BUTTON0_NODE DT_ALIAS(sw0)
+#define GPIO_NODE DT_NODELABEL(gpio)
+#if !DT_NODE_HAS_STATUS(GPIO_NODE, okay)
+#error "Unsupported board: gpio devicetree label is not defined"
+#endif
+
 
 static void fetch_and_display(const struct device *sensor)
 {
@@ -73,6 +81,7 @@ static void fetch_and_display(const struct device *sensor)
  * See the sample documentation for information on how to fix this.
  */
 static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
+static const struct gpio_dt_spec button = GPIO_DT_SPEC_GET(BUTTON0_NODE, gpios);
 
 #ifdef CONFIG_LIS2DH_TRIGGER
 static void trigger_handler(const struct device *dev,
@@ -93,18 +102,43 @@ int main(void)
 {
 	int ret;
     HAL_StatusTypeDef hal_status;
+    
 
 	if (!gpio_is_ready_dt(&led)) {
 		return 0;
 	}
 
+    if(!gpio_is_ready_dt(&button)) {
+        printk("Button device not ready.\n");
+        return 0;
+    }
+
 	ret = gpio_pin_configure_dt(&led, GPIO_OUTPUT_ACTIVE);
 	if (ret < 0) {
 		return 0;
 	}
+    
+    //ret = gpio_pin_configure_dt(&button, GPIO_INPUT); // TODO: THIS MESSES UP THE ACTUAL PINMUX????
+	if (ret < 0) {
+		return 0;
+	}
+    printk("Reading button..\n");
+    while (1) {
+			/* If we have an LED, match its state to the button's. */
+			int val = gpio_pin_get_dt(&button);
+            printk("%d", val);
+            //uint8_t val2;
+            //HAL_GPIO_Read(0, &val2);
+            //printk("%d", val2);
+
+			if (val >= 0) {
+				gpio_pin_set_dt(&led, val);
+			}
+			k_msleep(SLEEP_TIME_MS);
+		}
     printk("Initialising I2C..\n");
     hal_status = HAL_I2C_Init(i2c0config);
-    if (!hal_status) {
+    if (hal_status != HAL_OK) {
         printk("Failed to initialise I2C HAL interface! %x\n", hal_status);
         return 0;
     }

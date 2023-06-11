@@ -25,13 +25,13 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "eos3_dev.h"
+#include "eoss3_dev.h"
 //#include "eoss3_hal_ffe.h"
 //#include "eoss3_hal_rcc.h"
 #include "eoss3_hal_pad_config.h"
 #include "eoss3_hal_wb.h"
 #include <test_types.h>
-#include "s3x_clock_hal.h"
+//#include "s3x_clock_hal.h"
 
 /*!
  * \fn		HAL_StatusTypeDef HAL_WB_Transmit(UINT8_t ucOffset, UINT8_t ucVal, UINT8_t ucSlaveSel)
@@ -124,8 +124,8 @@ HAL_StatusTypeDef HAL_WB_Init(UINT8_t ucSlaveSel)
 
 	//HAL_SetClkGate(FFE_X1_CLK_TOP, C08X1_CLK_GATE_FFE_X1CLK,1);
 //	HAL_SetClkGate(EFUSE_SDMA_I2S_FFE_PF_CLK_TOP, C01_CLK_GATE_FFE,1);
-        S3x_Clk_Enable(S3X_FFE_X1_CLK);
-        S3x_Clk_Enable(S3X_FFE_CLK);
+        //S3x_Clk_Enable(S3X_FFE_X1_CLK); // TODO: Need to ENABLE this clock, based on reference manual page 339
+        //S3x_Clk_Enable(S3X_FFE_CLK);
 /*
         QL_LOG_DBG_150K("c8_x1 freq = %ld\r\n", S3x_Clk_Get_Rate(S3X_FFE_X1_CLK));
       	QL_LOG_DBG_150K("C01_clk_gate = %x\r\n",CRU->C01_CLK_GATE);
