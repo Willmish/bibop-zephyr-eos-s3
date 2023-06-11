@@ -13,6 +13,7 @@
 
 #include "eoss3_hal_i2c.h"
 #include "eoss3_hal_gpio.h"
+#include "lis2dh.h"
 
 //#include "app_version.h"
 
@@ -122,26 +123,39 @@ int main(void)
 	if (ret < 0) {
 		return 0;
 	}
-    printk("Reading button..\n");
-    while (1) {
-			/* If we have an LED, match its state to the button's. */
-			int val = gpio_pin_get_dt(&button);
-            printk("%d", val);
-            //uint8_t val2;
-            //HAL_GPIO_Read(0, &val2);
-            //printk("%d", val2);
+    //printk("Reading button..\n");
+    //while (1) {
+	//		/* If we have an LED, match its state to the button's. */
+	//		int val = gpio_pin_get_dt(&button);
+    //        printk("%d", val);
+    //        //uint8_t val2;
+    //        //HAL_GPIO_Read(0, &val2);
+    //        //printk("%d", val2);
 
-			if (val >= 0) {
-				gpio_pin_set_dt(&led, val);
-			}
-			k_msleep(SLEEP_TIME_MS);
-		}
+	//		if (val >= 0) {
+	//			gpio_pin_set_dt(&led, val);
+	//		}
+	//		k_msleep(SLEEP_TIME_MS);
+	//	}
     printk("Initialising I2C..\n");
     hal_status = HAL_I2C_Init(i2c0config);
     if (hal_status != HAL_OK) {
         printk("Failed to initialise I2C HAL interface! %x\n", hal_status);
         return 0;
     }
+    hal_status = HAL_I2C1_Select();
+    uint8_t rval[2] = {1,1};
+    if (hal_status != HAL_OK) {
+        printk("Failed to select I2C0 HAL interface! %x\n", hal_status);
+        return 0;
+    }
+    /* check who am i lis2dh */
+    hal_status = HAL_I2C_Read(LIS2DH12_I2C_ADDR, LIS2DH12_WHO_AM_I, rval, 1);
+    if (hal_status != HAL_OK) {
+        printk("Failed to read over I2C HAL interface! %x\n", hal_status);
+        return 0;
+    }
+    printk("LIS2DH12 WHO AM I: %d%d\n", rval[0], rval[1]);
 
 
 	const struct device *const sensor = DEVICE_DT_GET_ANY(st_lis2dh);
