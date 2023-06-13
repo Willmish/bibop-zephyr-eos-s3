@@ -112,6 +112,7 @@ HAL_StatusTypeDef HAL_WB_Init(UINT8_t ucSlaveSel)
 {
         PadConfig  padcfg;
 
+        /*
         //enable FFE power & clock domain
         PMU->FFE_PWR_MODE_CFG = 0x0;
         PMU->FFE_PD_SRC_MASK_N = 0x0;
@@ -126,6 +127,7 @@ HAL_StatusTypeDef HAL_WB_Init(UINT8_t ucSlaveSel)
 //	HAL_SetClkGate(EFUSE_SDMA_I2S_FFE_PF_CLK_TOP, C01_CLK_GATE_FFE,1);
         //S3x_Clk_Enable(S3X_FFE_X1_CLK); // TODO: Need to ENABLE this clock, based on reference manual page 339
         //S3x_Clk_Enable(S3X_FFE_CLK);
+        */
 /*
         QL_LOG_DBG_150K("c8_x1 freq = %ld\r\n", S3x_Clk_Get_Rate(S3X_FFE_X1_CLK));
       	QL_LOG_DBG_150K("C01_clk_gate = %x\r\n",CRU->C01_CLK_GATE);

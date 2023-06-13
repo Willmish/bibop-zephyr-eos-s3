@@ -133,7 +133,12 @@ HAL_StatusTypeDef HAL_I2C_SetClockFreq(UINT32_t uiClkFreq)
     UINT8_t val;
    //Set the frequency
     //uiClock = S3x_Clk_Get_Rate(S3X_FFE_X1_CLK); // TODO: FIX - add CLOCK rate getting function
-    uiClock = 10000;
+    /* Get Source Clock (CL08_X4) Rate, which is equal to High Speed OSC (HSOSC) clock Rate 
+     * and divide it accordingly. NOTE: This below assumes HSOSC rate is not modified (and by
+     * default it is not) 
+     * #define OSC_GET_FREQ_INC()	(((AIP->OSC_CTRL_1 & 0xFFF) + 3) * 32768)
+    */
+    uiClock = (((AIP->OSC_CTRL_1 & 0xFFF) + 3) * 32768)/4/6; // TODO: Find a programatic way to get the dividor (6) from CLK_CTRL_C_0, supposedly done here: https://github.com/QuickLogic-Corp/qorc-sdk/blob/d61d064146c0ee927aa12b088b3bbbce60615f4d/Libraries/Power/src/s3x_clock.c#L685
 
     // Program prescale value
 #if 1 //use new formula to compute    
