@@ -1,3 +1,17 @@
+# Building the application for QuickLogic QT Plus:
+
+We decided to update in-tree drivers and Modules, which in hindsight will be nice for upstreaming, but a pain for develpoing (need to keep 3 repos)
+
+You will need the updated HAL module from [here](https://github.com/Willmish/hal_quicklogic/tree/hal_i2c)
+And the updated zephyr repo with the I2C driver: [here](https://github.com/Willmish/zephyr/tree/eos_s3_fixes).
+
+then build it with: 
+```
+west build -p always -b quick_feather app/ -- -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DEXTRA_ZEPHYR_MODULES=/path/to/cloned/hal_quicklogic/
+```
+
+FLash with patched tinyFPGAProgrammer: https://github.com/QuickLogic-Corp/TinyFPGA-Programmer-Application/
+
 # Zephyr Example Application
 
 This repository contains a Zephyr example application. The main purpose of this
@@ -53,6 +67,7 @@ west update
 ```
 
 ### Building and running
+
 
 To build the application, run the following command:
 
