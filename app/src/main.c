@@ -96,7 +96,7 @@ int main(void)
     uint8_t who_am_i = 0;
         
     ret = i2c_reg_read_byte(i2c_dev, LIS2DH12_I2C_ADDR, LIS2DH12_WHO_AM_I, &who_am_i);
-    if (ret) {
+    if (ret == 0) {
     printk("LIS2DH12 WHO AM I: 0x%x\n", who_am_i);
     }
 
