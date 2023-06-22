@@ -87,7 +87,8 @@ static void fetch_and_display(const struct device *sensor)
 static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
 static const struct gpio_dt_spec button = GPIO_DT_SPEC_GET(BUTTON0_NODE, gpios);
 //const struct device *i2c_dev = DEVICE_DT_GET(I2C_NODE);
-const struct device *const sensor = DEVICE_DT_GET_ANY(st_lis2dh);
+//const struct device *const sensor = DEVICE_DT_GET_ANY(st_lis2dh);
+const struct device *const sensor_max = DEVICE_DT_GET_ANY(maxim_max30101);
 
 int main(void)
 {
@@ -102,16 +103,38 @@ int main(void)
         return 0;
     }
 
-    //if (i2c_dev == NULL || !device_is_ready(i2c_dev)) {
-    //    printk("I2C device not ready.\n");
-    //    return 0;
-    //}
+    /*
+    if (i2c_dev == NULL || !device_is_ready(i2c_dev)) {
+        printk("I2C device not ready.\n");
+        return 0;
+    }
+    */
 
 	ret = gpio_pin_configure_dt(&led, GPIO_OUTPUT_INACTIVE);
 	if (ret < 0) {
 		return 0;
 	}
 
+    if (sensor_max == NULL) {
+        printk("No Max30101/2 device found\n");
+        return 0;
+    }
+    if(!device_is_ready(sensor_max)) {
+        printk("Device %s is not ready\n", sensor_max->name);
+        return 0;
+    }
+
+    struct sensor_value green;
+    while(1) {
+        sensor_sample_fetch(sensor_max);
+        sensor_channel_get(sensor_max, SENSOR_CHAN_GREEN, &green);
+
+        /* print green LED data */
+        printf("GREEN=%d\n", green.val1);
+        k_sleep(K_MSEC(20));
+    }
+
+    /*
     if (sensor == NULL) {
         printk("No Lis2dh device found\n");
         return 0;
@@ -125,13 +148,14 @@ int main(void)
         fetch_and_display(sensor);
         k_sleep(K_MSEC(500));
     }
+    */
     /*
     printk("Initialising I2C..\n");
     uint8_t who_am_i = 0;
         
-    ret = i2c_reg_read_byte(i2c_dev, LIS2DH12_I2C_ADDR, LIS2DH12_WHO_AM_I, &who_am_i);
+    ret = i2c_reg_read_byte(i2c_dev, 0x57, 0xff, &who_am_i);
     if (ret == 0) {
-    printk("LIS2DH12 WHO AM I: 0x%x\n", who_am_i);
+    printk("MAX30102 WHO AM I: 0x%x\n", who_am_i);
     }
     */
 
