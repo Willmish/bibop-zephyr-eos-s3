@@ -5,6 +5,11 @@ We decided to update in-tree drivers and Modules, which in hindsight will be nic
 You will need the updated HAL module from [here](https://github.com/Willmish/hal_quicklogic/tree/hal_i2c)
 And the updated zephyr repo with the I2C driver: [here](https://github.com/Willmish/zephyr/tree/eos_s3_fixes).
 
+We are using an external module (hal_quicklogic), which is linked and built with the flag `-DEXTRA_ZEPHYR_MODULES`. However although docs mention this module will take precedence above the module intree. However, when building it tries building both and gives errors of redefinition, so you will need to remove the quicklogic hal old module from:
+```
+rm -rf zephyrproject/modules/hal/quicklogic
+```
+
 then build it with: 
 ```
 west build -p always -b quick_feather app/ -- -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DEXTRA_ZEPHYR_MODULES=/path/to/cloned/hal_quicklogic/
