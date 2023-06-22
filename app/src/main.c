@@ -17,6 +17,7 @@
 #include "lis2dh.h"
 
 //#include "app_version.h"
+#include "model_functions.hpp"
 
 
 /* 1000 msec = 1 sec */
@@ -124,10 +125,13 @@ int main(void)
         return 0;
     }
 
+    setup_model();
+
     struct sensor_value green;
     while(1) {
-        sensor_sample_fetch(sensor_max);
-        sensor_channel_get(sensor_max, SENSOR_CHAN_GREEN, &green);
+        //sensor_sample_fetch(sensor_max);
+        //sensor_channel_get(sensor_max, SENSOR_CHAN_GREEN, &green);
+        loop_model();
 
         /* print green LED data */
         printf("GREEN=%d\n", green.val1);
@@ -152,7 +156,7 @@ int main(void)
     /*
     printk("Initialising I2C..\n");
     uint8_t who_am_i = 0;
-        
+
     ret = i2c_reg_read_byte(i2c_dev, 0x57, 0xff, &who_am_i);
     if (ret == 0) {
     printk("MAX30102 WHO AM I: 0x%x\n", who_am_i);
