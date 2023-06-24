@@ -1,5 +1,7 @@
 /*
  * Copyright (c) 2023 Jakub Duchniewicz
+ * Copyright (c) 2023 Szymon Duchniewicz
+ * Copyright (c) 2023 Avanade Inc.
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -12,10 +14,9 @@
 #include <zephyr/device.h>
 #include <stdio.h>
 
-//#include "eoss3_hal_i2c.h"
-//#include "eoss3_hal_gpio.h"
 #include "lis2dh.h"
 
+#include "bibop_display.h"
 //#include "app_version.h"
 
 
@@ -89,6 +90,7 @@ static const struct gpio_dt_spec button = GPIO_DT_SPEC_GET(BUTTON0_NODE, gpios);
 //const struct device *i2c_dev = DEVICE_DT_GET(I2C_NODE);
 //const struct device *const sensor = DEVICE_DT_GET_ANY(st_lis2dh);
 const struct device *const sensor_max = DEVICE_DT_GET_ANY(maxim_max30101);
+const struct device *dev_display = DEVICE_DT_GET(DT_CHOSEN(zephyr_display));
 
 int main(void)
 {
@@ -124,15 +126,27 @@ int main(void)
         return 0;
     }
 
-    struct sensor_value green;
-    while(1) {
-        sensor_sample_fetch(sensor_max);
-        sensor_channel_get(sensor_max, SENSOR_CHAN_GREEN, &green);
-
-        /* print green LED data */
-        printf("GREEN=%d\n", green.val1);
-        k_sleep(K_MSEC(20));
+    if(!device_is_ready(dev_display)) {
+        printk("Device %s is not ready\n", dev_display->name);
+        return 0;
     }
+
+    struct bibop_display_conf display_conf;
+    if (!bdisplay_init(dev_display, &display_conf)) {
+        return 0;
+    }
+    bdisplay_loop(dev_display, &display_conf);
+
+
+    //struct sensor_value green;
+    //while(1) {
+    //    sensor_sample_fetch(sensor_max);
+    //    sensor_channel_get(sensor_max, SENSOR_CHAN_GREEN, &green);
+
+    //    /* print green LED data */
+    //    printf("GREEN=%d\n", green.val1);
+    //    k_sleep(K_MSEC(20));
+    //}
 
     /*
     if (sensor == NULL) {

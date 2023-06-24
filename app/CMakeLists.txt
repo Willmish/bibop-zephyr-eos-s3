@@ -14,6 +14,7 @@ target_include_directories(app PRIVATE ${CMAKE_BINARY_DIR}/app/include src)
 
 target_sources(app PRIVATE 
                 src/main.c
+                src/bibop_display.c
                 #src/eoss3_hal_i2c.c
                 #src/eoss3_hal_wb.c
                 #src/s3x_clock_hal.c
