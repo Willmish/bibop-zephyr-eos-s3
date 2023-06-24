@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <vector>
 #include <algorithm>
+#include <limits>
 
 /* Steps to proceed:
  * Port the python code here
@@ -114,17 +115,19 @@ std::vector<float> gradient(const std::vector<float> &input)
 //    return res;
 //}
 
-std::vector<int> find_peaks(const std::vector<float> &input) // TODO: height parameter?
+// FIXME: add height param here, something wrong!
+std::vector<int> find_peaks(const std::vector<float> &input, float height = std::numeric_limits<float>::lowest()) // TODO: height parameter?
 {
 	std::vector<int> peaks;
 	for (size_t i = 1; i < input.size() - 1; ++i)
 	{
-		if (input[i] > input[i - 1] && input[i] > input[i + 1])
+		if (input[i] > input[i - 1] && input[i] > input[i + 1] && input[i] > height)
         {
-            //printk("pushed back peak idx: %d\n", i);
+            printk("pushed back peak idx: %d\n", i); // TODO: debug where the inacurracy is between Python and C++
 			peaks.push_back(i);
         }
 	}
+    printk("Done pushing\n");
 	return peaks;
 }
 
@@ -139,7 +142,7 @@ TimeCycle time_cycle(const std::vector<float> &input, int sys_1, int sys_2, int 
 int dicr_notch(const std::vector<float> &input_ii, int sys_1)
 {
     std::vector<float> input_ii_sys_1 = std::vector<float>(input_ii.begin() + sys_1, input_ii.end());
-    std::vector<int> peaks = find_peaks(input_ii_sys_1);
+    std::vector<int> peaks = find_peaks(input_ii_sys_1, 0); // still does not get 2 guys here, have to fix it
     if (!peaks.size())
         return -1;
 
