@@ -3,6 +3,7 @@
 *.swp
 *~
 
+**/compile_commands.json
 # python
 .venv
 

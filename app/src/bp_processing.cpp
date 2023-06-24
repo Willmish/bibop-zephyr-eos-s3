@@ -19,6 +19,9 @@ std::vector<double> ppg; // FIXME: dummy vector that should be put somewhere els
 std::vector<double> ppg_i, ppg_ii;
 constexpr auto FS = 125;
 
+// TODO: add scaling params for means and STDDEVs
+//constexpr auto
+
 struct TimeCycle
 {
     int cycle_len;
@@ -145,4 +148,6 @@ void preprocess_data()
 
     // extract features
 	Features ftrs = extract_features(ppg, ppg_ii);
+
+    // prescale the data with values from the dataset
 }
