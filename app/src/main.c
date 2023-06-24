@@ -18,6 +18,7 @@
 
 //#include "app_version.h"
 #include "model_functions.hpp"
+#include "bp_processing.hpp"
 
 
 /* 1000 msec = 1 sec */
@@ -126,15 +127,16 @@ int main(void)
     //}
 
     setup_model();
+    preprocess_data();
 
     struct sensor_value green;
     while(1) {
         //sensor_sample_fetch(sensor_max);
         //sensor_channel_get(sensor_max, SENSOR_CHAN_GREEN, &green);
-        loop_model();
+        //loop_model();
 
         /* print green LED data */
-        printf("GREEN=%d\n", green.val1);
+        //printf("GREEN=%d\n", green.val1);
         k_sleep(K_MSEC(20));
     }
 
