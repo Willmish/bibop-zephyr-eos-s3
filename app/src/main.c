@@ -17,6 +17,7 @@
 #include "lis2dh.h"
 
 #include "bibop_display.h"
+#include "bibop_max30102.h"
 //#include "app_version.h"
 
 
@@ -39,58 +40,13 @@
  * A build error on this line means your board is unsupported.
  * See the sample documentation for information on how to fix this.
  */
-static void fetch_and_display(const struct device *sensor)
-{
-	static unsigned int count;
-	struct sensor_value accel[3];
-	struct sensor_value temperature;
-	const char *overrun = "";
-	int rc = sensor_sample_fetch(sensor);
-
-	++count;
-	if (rc == -EBADMSG) {
-		/* Sample overrun.  Ignore in polled mode. */
-		if (IS_ENABLED(CONFIG_LIS2DH_TRIGGER)) {
-			overrun = "[OVERRUN] ";
-		}
-		rc = 0;
-	}
-	if (rc == 0) {
-		rc = sensor_channel_get(sensor,
-					SENSOR_CHAN_ACCEL_XYZ,
-					accel);
-	}
-	if (rc < 0) {
-		printf("ERROR: Update failed: %d\n", rc);
-	} else {
-		printf("#%u @ %u ms: %sx %f , y %f , z %f",
-		       count, k_uptime_get_32(), overrun,
-		       sensor_value_to_double(&accel[0]),
-		       sensor_value_to_double(&accel[1]),
-		       sensor_value_to_double(&accel[2]));
-	}
-
-	if (IS_ENABLED(CONFIG_LIS2DH_MEASURE_TEMPERATURE)) {
-		if (rc == 0) {
-			rc = sensor_channel_get(sensor, SENSOR_CHAN_DIE_TEMP, &temperature);
-			if (rc < 0) {
-				printf("\nERROR: Unable to read temperature:%d\n", rc);
-			} else {
-				printf(", t %f\n", sensor_value_to_double(&temperature));
-			}
-		}
-
-	} else {
-		printf("\n");
-	}
-}
 
 static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
 static const struct gpio_dt_spec button = GPIO_DT_SPEC_GET(BUTTON0_NODE, gpios);
 //const struct device *i2c_dev = DEVICE_DT_GET(I2C_NODE);
 //const struct device *const sensor = DEVICE_DT_GET_ANY(st_lis2dh);
 const struct device *const sensor_max = DEVICE_DT_GET_ANY(maxim_max30101);
-const struct device *dev_display = DEVICE_DT_GET(DT_CHOSEN(zephyr_display));
+//const struct device *dev_display = DEVICE_DT_GET(DT_CHOSEN(zephyr_display));
 
 int main(void)
 {
@@ -126,27 +82,39 @@ int main(void)
         return 0;
     }
 
+    /*
     if(!device_is_ready(dev_display)) {
         printk("Device %s is not ready\n", dev_display->name);
         return 0;
     }
+    */
 
+    /*
+     // DEMO display
     struct bibop_display_conf display_conf;
     if (!bdisplay_init(dev_display, &display_conf)) {
         return 0;
     }
     bdisplay_loop(dev_display, &display_conf);
+    */
 
 
-    //struct sensor_value green;
-    //while(1) {
-    //    sensor_sample_fetch(sensor_max);
-    //    sensor_channel_get(sensor_max, SENSOR_CHAN_GREEN, &green);
+    struct sensor_value ir;
+    struct sensor_value red;
+    /*
+     * NOTE: SENSOR_CHAN_IR on our board IS CONNECTED TO THE RED LED
+     * and SENSOR_CHAN_RED is connected TO THE IR LED. So data is actually coming from the other place
+     */
+    while(1) {
+        sensor_sample_fetch(sensor_max);
+        sensor_channel_get(sensor_max, SENSOR_CHAN_IR, &red);
+        sensor_channel_get(sensor_max, SENSOR_CHAN_RED, &ir);
 
-    //    /* print green LED data */
-    //    printf("GREEN=%d\n", green.val1);
-    //    k_sleep(K_MSEC(20));
-    //}
+        /* print green LED data */
+        printf("IR=%d\n", ir.val1);
+        printf("RED=%d\n", red.val1);
+        k_sleep(K_MSEC(20));
+    }
 
     /*
     if (sensor == NULL) {
