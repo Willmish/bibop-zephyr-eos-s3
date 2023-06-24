@@ -34,7 +34,7 @@ void setup_model(void)
 	/* Map the model into a usable data structure. This doesn't involve any
 	 * copying or parsing, it's a very lightweight operation.
 	 */
-	model = tflite::GetModel(linear_bp_model_lighter_tflite);
+	model = tflite::GetModel(linear_bp_model_lighter_quant_tflite);
 	if (model->version() != TFLITE_SCHEMA_VERSION) {
 		TF_LITE_REPORT_ERROR(error_reporter,
 						"Model provided is schema version %d not equal "
@@ -81,16 +81,25 @@ void loop_model(void)
 	//		 static_cast < float > (kInferencesPerCycle);
 	//float x = position * kXrange;
 
-	///* Quantize the input from floating-point to integer */
+    static float buf[6] = { 0.34314155, -0.02509177, 0.43447335, 0.74105764, 0.32367285, 1.66480085 };
+    static int8_t scaled_buf[6] = { };
+	/* Quantize the input from floating-point to integer */
+    for (int i = 0; i < 6; ++i)
+        scaled_buf[i] = buf[i] / input->params.scale + input->params.zero_point;
+
 	//int8_t x_quantized = x / input->params.scale + input->params.zero_point;
 	///* Place the quantized input in the model's input tensor */
-    static uint8_t buf[6] = { 1, 2, 3, 4, 5, 6 };
-	input->data.int8[0] = buf[0];
-	input->data.int8[1] = buf[1];
-	input->data.int8[2] = buf[2];
-	input->data.int8[3] = buf[3];
-	input->data.int8[4] = buf[4];
-	input->data.int8[5] = buf[5];
+	input->data.int8[0] = scaled_buf[0];
+	input->data.int8[1] = scaled_buf[1];
+	input->data.int8[2] = scaled_buf[2];
+	input->data.int8[3] = scaled_buf[3];
+	input->data.int8[4] = scaled_buf[4];
+	input->data.int8[5] = scaled_buf[5];
+
+    TF_LITE_REPORT_ERROR(error_reporter, "scale: %f zp: %d\n", input->params.scale, input->params.zero_point);
+    TF_LITE_REPORT_ERROR(error_reporter, "Model input: %x %x %x %x %x %x\n",
+                        scaled_buf[0], scaled_buf[1], scaled_buf[2],
+                        scaled_buf[3], scaled_buf[4], scaled_buf[5]);
 
 	/* Run inference, and report any error */
 	TfLiteStatus invoke_status = interpreter->Invoke();
@@ -99,16 +108,19 @@ void loop_model(void)
 		return;
 	}
 
-	///* Obtain the quantized output from model's output tensor */
-	//int8_t y_quantized = output->data.int8[0];
-	///* Dequantize the output from integer to floating-point */
-	//float y = (y_quantized - output->params.zero_point) * output->params.scale;
+	/* Obtain the quantized output from model's output tensor */
+	int8_t sbp_scaled = output->data.int8[0];
+	int8_t dbp_scaled = output->data.int8[1];
+	/* Dequantize the output from integer to floating-point */
+	float sbp = (sbp_scaled - output->params.zero_point) * output->params.scale;
+	float dbp = (dbp_scaled - output->params.zero_point) * output->params.scale;
 
 	/* Output the results. A custom HandleOutput function can be implemented
 	 * for each supported hardware target.
 	 */
 
-    TF_LITE_REPORT_ERROR(error_reporter, "All is fine with model\n");
+    TF_LITE_REPORT_ERROR(error_reporter, "Model outut: SBP: %f DBP: %f\n",
+                         sbp, dbp);
 
 	/* Increment the inference_counter, and reset it if we have reached
 	 * the total number per cycle

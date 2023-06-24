@@ -16,7 +16,10 @@ target_include_directories(app PRIVATE ${CMAKE_BINARY_DIR}/app/include src)
 # C++ ABI for thread-safe initialization of local statics and the constructors don't
 # appear to require thread safety, we turn it off in the C++ compiler.
 set(NO_THREADSAFE_STATICS $<TARGET_PROPERTY:compiler-cpp,no_threadsafe_statics>)
+#set(CPP_STANDARD $<TARGET_PROPERTY:compiler-cpp,std=c++17>)
 zephyr_compile_options($<$<COMPILE_LANGUAGE:CXX>:${NO_THREADSAFE_STATICS}>)
+    #zephyr_compile_options($<$<COMPILE_LANGUAGE:CXX>:${NO_THREADSAFE_STATICS}
+    #                                             ${CPP_STANDARD}>)
 
 target_sources(app PRIVATE
                 src/main.c
