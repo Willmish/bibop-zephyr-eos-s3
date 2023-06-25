@@ -20,6 +20,7 @@
 #include "bibop_max30102.h"
 //#include "app_version.h"
 #include "model_functions.hpp"
+#include "bp_processing.hpp"
 
 
 /* 1000 msec = 1 sec */
@@ -85,6 +86,7 @@ int main(void)
     //}
 
     setup_model();
+    preprocess_data();
 
     /*
      // DEMO display
@@ -107,7 +109,6 @@ int main(void)
         bibop_get_mapped_values(sensor_max, &ir, &red);
         k_sleep(K_MSEC(5)); // 5 ms intervals (200Hz)
     }
-
     /*
     if (sensor == NULL) {
         printk("No Lis2dh device found\n");
