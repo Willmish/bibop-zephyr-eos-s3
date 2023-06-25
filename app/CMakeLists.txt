@@ -7,15 +7,23 @@
 cmake_minimum_required(VERSION 3.13.1)
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 
-project(app LANGUAGES C VERSION 1.0.0)
+project(bibop_eos_s3)
 
-configure_file(app_version.h.in ${CMAKE_BINARY_DIR}/app/include/app_version.h)
+#configure_file(app_version.h.in ${CMAKE_BINARY_DIR}/app/include/app_version.h)
 target_include_directories(app PRIVATE ${CMAKE_BINARY_DIR}/app/include src)
 
-target_sources(app PRIVATE 
+# These samples use local static initialization. Since Zephyr doesn't support the
+# C++ ABI for thread-safe initialization of local statics and the constructors don't
+# appear to require thread safety, we turn it off in the C++ compiler.
+set(NO_THREADSAFE_STATICS $<TARGET_PROPERTY:compiler-cpp,no_threadsafe_statics>)
+zephyr_compile_options($<$<COMPILE_LANGUAGE:CXX>:${NO_THREADSAFE_STATICS}>)
+
+target_sources(app PRIVATE
                 src/main.c
                 src/bibop_display.c
                 src/bibop_max30102.c
+                src/model.cpp
+                src/model_functions.cpp
                 #src/eoss3_hal_i2c.c
                 #src/eoss3_hal_wb.c
                 #src/s3x_clock_hal.c

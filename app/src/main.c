@@ -19,6 +19,7 @@
 #include "bibop_display.h"
 #include "bibop_max30102.h"
 //#include "app_version.h"
+#include "model_functions.hpp"
 
 
 /* 1000 msec = 1 sec */
@@ -82,12 +83,7 @@ int main(void)
         return 0;
     }
 
-    /*
-    if(!device_is_ready(dev_display)) {
-        printk("Device %s is not ready\n", dev_display->name);
-        return 0;
-    }
-    */
+    setup_model();
 
     /*
      // DEMO display
@@ -105,6 +101,7 @@ int main(void)
      * NOTE: SENSOR_CHAN_IR on our board IS CONNECTED TO THE RED LED
      * and SENSOR_CHAN_RED is connected TO THE IR LED. So data is actually coming from the other place
      */
+    loop_model();
     while(1) {
         bibop_get_mapped_values(sensor_max, &ir, &red);
         k_sleep(K_MSEC(5)); // 5 ms intervals (200Hz)
@@ -128,7 +125,7 @@ int main(void)
     /*
     printk("Initialising I2C..\n");
     uint8_t who_am_i = 0;
-        
+
     ret = i2c_reg_read_byte(i2c_dev, 0x57, 0xff, &who_am_i);
     if (ret == 0) {
     printk("MAX30102 WHO AM I: 0x%x\n", who_am_i);
