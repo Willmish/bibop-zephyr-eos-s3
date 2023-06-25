@@ -48,6 +48,7 @@ static const struct gpio_dt_spec button = GPIO_DT_SPEC_GET(BUTTON0_NODE, gpios);
 //const struct device *const sensor = DEVICE_DT_GET_ANY(st_lis2dh);
 const struct device *const sensor_max = DEVICE_DT_GET_ANY(maxim_max30101);
 //const struct device *dev_display = DEVICE_DT_GET(DT_CHOSEN(zephyr_display));
+//const struct device *const sensor_max = DEVICE_DT_GET_ANY(maxim_max30101);
 
 int main(void)
 {
@@ -74,14 +75,14 @@ int main(void)
 		return 0;
 	}
 
-    if (sensor_max == NULL) {
-        printk("No Max30101/2 device found\n");
-        return 0;
-    }
-    if(!device_is_ready(sensor_max)) {
-        printk("Device %s is not ready\n", sensor_max->name);
-        return 0;
-    }
+    //if (sensor_max == NULL) {
+    //    printk("No Max30101/2 device found\n");
+    //    return 0;
+    //}
+    //if(!device_is_ready(sensor_max)) {
+    //    printk("Device %s is not ready\n", sensor_max->name);
+    //    return 0;
+    //}
 
     setup_model();
 

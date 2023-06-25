@@ -24,6 +24,7 @@ target_sources(app PRIVATE
                 src/bibop_max30102.c
                 src/model.cpp
                 src/model_functions.cpp
+                src/bp_processing.cpp
                 #src/eoss3_hal_i2c.c
                 #src/eoss3_hal_wb.c
                 #src/s3x_clock_hal.c
