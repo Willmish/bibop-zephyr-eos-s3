@@ -3,10 +3,10 @@
 #include <zephyr/kernel.h>
 #include <stdio.h>
 
-#define MAX30102_MAX_IR 120000
-#define MAX30102_MIN_IR 90000
-#define MAX30102_MAX_RED 110000
-#define MAX30102_MIN_RED 90000
+#define MAX30102_MAX_IR 115000
+#define MAX30102_MIN_IR 95000
+#define MAX30102_MAX_RED 105000
+#define MAX30102_MIN_RED 95000
 
 
 int8_t bibop_max30102_remap(uint32_t old_min, uint32_t old_max, uint32_t old_val) {
@@ -26,13 +26,13 @@ void bibop_get_mapped_values(const struct device * const sensor_max, struct sens
         sensor_channel_get(sensor_max, SENSOR_CHAN_RED, ir);
 
         /* print green LED data */
-        int8_t new_ir = bibop_max30102_remap(MAX30102_MIN_IR, MAX30102_MAX_IR, ir->val1);
-        int8_t new_red = bibop_max30102_remap(MAX30102_MIN_RED, MAX30102_MAX_RED, red->val1);
-        if (new_ir == -128 && new_red == -128) {
-            /* Super low ir and red values, probably finger not there */
-            printf("Place yo finger on the sensor!\n");
-            return;
-        }
-        printf("IR=%d %d\n", ir->val1, new_ir);
-        printf("RED=%d %d\n", red->val1, new_red);
+        ir->val2 = bibop_max30102_remap(MAX30102_MIN_IR, MAX30102_MAX_IR, ir->val1);
+        red->val2 = bibop_max30102_remap(MAX30102_MIN_RED, MAX30102_MAX_RED, red->val1);
+        //if (new_ir == -128 && new_red == -128) {
+        //    /* Super low ir and red values, probably finger not there */
+        //    printf("Place yo finger on the sensor!\n");
+        //    return;
+        //}
+        printf("IR=%d %d\n", ir->val1, ir->val2);
+        printf("RED=%d %d\n", red->val1, red->val2);
 }
