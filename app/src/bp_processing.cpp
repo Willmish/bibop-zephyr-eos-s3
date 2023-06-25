@@ -55,8 +55,8 @@ constexpr float DUMMY_RESULTS[6] = { 0.504, 0.128, 0.376, 0.128, 0.248, 2.531806
 
 struct TimeCycle
 {
-    int cycle_len;
-    int dia_2;
+    float cycle_len;
+    float dia_2;
 };
 
 struct Features
@@ -133,10 +133,10 @@ std::vector<int> find_peaks(const std::vector<float> &input, float height = std:
 
 TimeCycle time_cycle(const std::vector<float> &input, int sys_1, int sys_2, int dia_1)
 {
-    // TODO: vnrify the argmin - I don't trust these methods..
-    int dia_2 = std::distance(input.begin(), std::min_element(input.begin() + sys_1, input.begin() + sys_2)) + sys_1;
-    int cycle_len = dia_2 - dia_1;
-    return { cycle_len, dia_2 };
+    float dia_2 = std::distance(input.begin() + sys_1,
+                  std::min_element(input.begin() + sys_1, input.begin() + sys_2)) +
+                  sys_1; // adjust here
+    return { dia_2 - dia_1, dia_2 };
 }
 
 int dicr_notch(const std::vector<float> &input_ii, int sys_1)
@@ -194,6 +194,7 @@ Features extract_features(const std::vector<float> &ppg, const std::vector<float
     t_sys_end /= FS;
     t_sys_dicr /= FS;
     t_dicr_end /= FS;
+
     // TODO: add printks
     return { cycle_len, t_start_sys, t_sys_end,
             t_sys_dicr, t_dicr_end, ratio };
@@ -210,25 +211,26 @@ void preprocess_data()
 	ppg_ii = gradient(ppg_i);
 
     //printk("PPG\n");
-    //for (int i = 0; i < 5; i+=5)
+    //for (int i = 0; i < 10; i+=5)
     //{
     //    printk("%f %f %f %f %f\n",
     //            DUMMY_PPG[i], DUMMY_PPG[i+1], DUMMY_PPG[i+2], DUMMY_PPG[i+3], DUMMY_PPG[i+4]);
     //}
 
     //printk("PPG_I\n");
-    //for (int i = 0; i < 5; i+=5)
+    //for (int i = 0; i < 10; i+=5)
     //{
     //    printk("%f %f %f %f %f\n",
     //            ppg_i[i], ppg_i[i+1], ppg_i[i+2], ppg_i[i+3], ppg_i[i+4]);
     //}
 
     //printk("PPG_II\n");
-    //for (int i = 0; i < 5; i+=5)
+    //for (int i = 0; i < 10; i+=5)
     //{
     //    printk("%f %f %f %f %f\n",
     //            ppg_ii[i], ppg_ii[i+1], ppg_ii[i+2], ppg_ii[i+3], ppg_ii[i+4]);
     //}
+
     // extract features
 	Features ftrs = extract_features(DUMMY_PPG, ppg_ii);
 
