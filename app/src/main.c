@@ -106,14 +106,8 @@ int main(void)
      * and SENSOR_CHAN_RED is connected TO THE IR LED. So data is actually coming from the other place
      */
     while(1) {
-        sensor_sample_fetch(sensor_max);
-        sensor_channel_get(sensor_max, SENSOR_CHAN_IR, &red);
-        sensor_channel_get(sensor_max, SENSOR_CHAN_RED, &ir);
-
-        /* print green LED data */
-        printf("IR=%d\n", ir.val1);
-        printf("RED=%d\n", red.val1);
-        k_sleep(K_MSEC(20));
+        bibop_get_mapped_values(sensor_max, &ir, &red);
+        k_sleep(K_MSEC(5)); // 5 ms intervals (200Hz)
     }
 
     /*
