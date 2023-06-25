@@ -63,3 +63,15 @@ void bdisplay_loop(const struct device *dev, struct bibop_display_conf *display_
 		}
 	}
 }
+
+void bdisplay_writetext(const struct device *dev, struct bibop_display_conf *display_conf, const char *text) {
+        cfb_framebuffer_clear(dev, false);
+        if (cfb_print(dev,
+                  text,
+                  0, 2 * display_conf->ppt)) {
+            printf("Failed to print a string\n");
+            return;
+        }
+
+        cfb_framebuffer_finalize(dev);
+}

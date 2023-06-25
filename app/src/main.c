@@ -48,8 +48,7 @@ static const struct gpio_dt_spec button = GPIO_DT_SPEC_GET(BUTTON0_NODE, gpios);
 //const struct device *i2c_dev = DEVICE_DT_GET(I2C_NODE);
 //const struct device *const sensor = DEVICE_DT_GET_ANY(st_lis2dh);
 const struct device *const sensor_max = DEVICE_DT_GET_ANY(maxim_max30101);
-//const struct device *dev_display = DEVICE_DT_GET(DT_CHOSEN(zephyr_display));
-//const struct device *const sensor_max = DEVICE_DT_GET_ANY(maxim_max30101);
+const struct device *dev_display = DEVICE_DT_GET(DT_CHOSEN(zephyr_display));
 
 int main(void)
 {
@@ -87,19 +86,24 @@ int main(void)
 
     setup_model();
     preprocess_data();
+    if(!device_is_ready(dev_display)) {
+        printk("Device %s is not ready\n", dev_display->name);
+        return 0;
+    }
 
-    /*
      // DEMO display
     struct bibop_display_conf display_conf;
     if (!bdisplay_init(dev_display, &display_conf)) {
         return 0;
     }
+    /*
     bdisplay_loop(dev_display, &display_conf);
     */
 
 
     struct sensor_value ir;
     struct sensor_value red;
+    char print_buf[64];
     /*
      * NOTE: SENSOR_CHAN_IR on our board IS CONNECTED TO THE RED LED
      * and SENSOR_CHAN_RED is connected TO THE IR LED. So data is actually coming from the other place
@@ -107,51 +111,15 @@ int main(void)
     loop_model();
     while(1) {
         bibop_get_mapped_values(sensor_max, &ir, &red);
+        if(ir.val2 == -128)
+        {
+            snprintk(print_buf, sizeof(print_buf), "Place your finger on the sensor");
+        }
+        else {
+            snprintk(print_buf, sizeof(print_buf), "IR value:   %d", ir.val2);
+        }
+        bdisplay_writetext(dev_display, &display_conf, print_buf);
         k_sleep(K_MSEC(5)); // 5 ms intervals (200Hz)
     }
-    /*
-    if (sensor == NULL) {
-        printk("No Lis2dh device found\n");
-        return 0;
-    }
-    if(!device_is_ready(sensor)) {
-        printk("Device %s is not ready\n", sensor->name);
-        return 0;
-    }
-    printk("Polling at 2Hz\n");
-    while(true) {
-        fetch_and_display(sensor);
-        k_sleep(K_MSEC(500));
-    }
-    */
-    /*
-    printk("Initialising I2C..\n");
-    uint8_t who_am_i = 0;
-
-    ret = i2c_reg_read_byte(i2c_dev, 0x57, 0xff, &who_am_i);
-    if (ret == 0) {
-    printk("MAX30102 WHO AM I: 0x%x\n", who_am_i);
-    }
-    */
-
-    /*ret = gpio_pin_configure_dt(&button, GPIO_INPUT); // TODO: THIS MESSES UP THE ACTUAL PINMUX????
-	if (ret < 0) {
-		return 0;
-	}
-    printk("Reading button..\n");
-    while (1) {
-	//	If we have an LED, match its state to the button's.
-			int val = gpio_pin_get_dt(&button);
-            printk("%d", val);
-            //uint8_t val2;
-            //HAL_GPIO_Read(0, &val2);
-            //printk("%d", val2);
-
-			if (val >= 0) {
-				gpio_pin_set_dt(&led, val);
-			}
-			k_msleep(SLEEP_TIME_MS);
-		}
-    	*/
     return 0;
 }
