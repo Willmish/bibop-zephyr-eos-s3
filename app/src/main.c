@@ -43,6 +43,8 @@ static const struct gpio_dt_spec button = GPIO_DT_SPEC_GET(BUTTON0_NODE, gpios);
 const struct device *const sensor_max = DEVICE_DT_GET_ANY(maxim_max30101);
 const struct device *dev_display = DEVICE_DT_GET(DT_CHOSEN(zephyr_display));
 
+volatile struct sensor_value ir;
+
 int init_main();
 void sensor_task(void *, void *, void *);
 void inference_task(void *, void *, void *);
@@ -67,7 +69,6 @@ int main(void)
     bdisplay_loop(dev_display, &display_conf);
     */
 
-    struct sensor_value ir;
     struct sensor_value red;
     char print_buf[64];
     /*
@@ -75,7 +76,6 @@ int main(void)
      * and SENSOR_CHAN_RED is connected TO THE IR LED. So data is actually coming from the other place
      */
     while(1) {
-        //bibop_get_mapped_values(sensor_max, &ir, &red);
         //if (ir.val2 == -128) {
         //    snprintk(print_buf, sizeof(print_buf), "Place your finger on the sensor");
         //}
@@ -122,10 +122,14 @@ int init_main() {
     return 1;
 }
 
+// TODO: add buffering of data and proper management of that\
+// add preprocessing of data and lastly displaying + buffering of outpu (semaphores)
 void sensor_task(void* p1, void *p2, void *p3)
 {
+    struct sensor_value red;
     while (1) {
         printk("hello from sensor_task\n");
+        bibop_get_mapped_values(sensor_max, &ir, &red); // TODO: how to put the data without volatile
         k_sleep(K_MSEC(500));
     }
 }
