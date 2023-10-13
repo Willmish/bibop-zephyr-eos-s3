@@ -1,3 +1,7 @@
+# Unbricking/reflashing bootloader for Quicklogic QT Plus/Quickfeather
+
+https://forum.quicklogic.com/viewtopic.php?t=29
+
 # Building the application for QuickLogic QT Plus:
 
 We decided to update in-tree drivers and Modules, which in hindsight will be nice for upstreaming, but a pain for develpoing (need to keep 3 repos)
