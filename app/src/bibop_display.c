@@ -7,7 +7,7 @@ int  bdisplay_init(const struct device *dev, struct bibop_display_conf *display_
     }
 
     printf("Initialized %s\n", dev->name);
-    
+
 	if (cfb_framebuffer_init(dev)) {
 		printf("Framebuffer initialization failed!\n");
 		return 0;
@@ -44,24 +44,22 @@ int  bdisplay_init(const struct device *dev, struct bibop_display_conf *display_
 }
 
 void bdisplay_loop(const struct device *dev, struct bibop_display_conf *display_conf) {
+    for (int i = 0; i < display_conf->rows; i++) {
+        cfb_framebuffer_clear(dev, false);
+        if (cfb_print(dev,
+                  "0123456789mMgj!\"§$%&/()=",
+                  0, i * display_conf->ppt)) {
+            printf("Failed to print a string\n");
+            continue;
+        }
 
-
-	while (1) {
-		for (int i = 0; i < display_conf->rows; i++) {
-			cfb_framebuffer_clear(dev, false);
-			if (cfb_print(dev,
-				      "0123456789mMgj!\"§$%&/()=",
-				      0, i * display_conf->ppt)) {
-				printf("Failed to print a string\n");
-				continue;
-			}
-
-			cfb_framebuffer_finalize(dev);
+        cfb_framebuffer_finalize(dev);
+        /*
 #if defined(CONFIG_ARCH_POSIX)
-			k_sleep(K_MSEC(100));
+        k_sleep(K_MSEC(100));
 #endif
-		}
-	}
+        */
+    }
 }
 
 void bdisplay_writetext(const struct device *dev, struct bibop_display_conf *display_conf, const char *text) {

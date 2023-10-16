@@ -28,4 +28,9 @@
 		com-invdir;
 		prechargep = <0x22>;
     };
+    max30102: max30101@57 {
+        compatible = "maxim,max30101";
+        status = "okay";
+        reg = <0x57>;
+    };
 };

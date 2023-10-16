@@ -44,10 +44,12 @@ const struct device *const sensor_max = DEVICE_DT_GET_ANY(maxim_max30101);
 const struct device *dev_display = DEVICE_DT_GET(DT_CHOSEN(zephyr_display));
 
 volatile struct sensor_value ir;
+static struct bibop_display_conf display_conf;
 
 int init_main();
 void sensor_task(void *, void *, void *);
 void inference_task(void *, void *, void *);
+void display_task(void *, void *, void *);
 
 /* Define threads */
 K_THREAD_DEFINE(sensor_task_id, STACKSIZE, sensor_task,
@@ -56,10 +58,12 @@ K_THREAD_DEFINE(sensor_task_id, STACKSIZE, sensor_task,
 K_THREAD_DEFINE(inference_task_id, STACKSIZE, inference_task,
                 NULL, NULL, NULL,
                 PRIORITY, 0, THREAD_DELAY_START);
+K_THREAD_DEFINE(display_task_id, STACKSIZE, display_task,
+                NULL, NULL, NULL,
+                PRIORITY, 0, THREAD_DELAY_START);
 
 int main(void)
 {
-    struct bibop_display_conf display_conf;
     if(!init_main())
         return 0;
     if (!bdisplay_init(dev_display, &display_conf)) {
@@ -114,7 +118,7 @@ int init_main() {
     }
 
     setup_model();
-    preprocess_data();
+    preprocess_data(); // TODO: this should be moved to the inference task
     if (!device_is_ready(dev_display)) {
         printk("Device %s is not ready\n", dev_display->name);
         return 0;
@@ -122,9 +126,13 @@ int init_main() {
     return 1;
 }
 
-// TODO: add buffering of data and proper management of that\
+// TODO: add buffering of data and proper management of that
 // add preprocessing of data and lastly displaying + buffering of outpu (semaphores)
-void sensor_task(void* p1, void *p2, void *p3)
+// TODO: check if synchronisation is necessary, use simple queue for now
+// adjust scaling of the data and ensure that proper data is printed on the screen
+// as of now just display BP on the screen and maybe some other value (HR?)
+// solder it and just have a small box powered by USB
+void sensor_task(void *p1, void *p2, void *p3)
 {
     struct sensor_value red;
     while (1) {
@@ -140,6 +148,15 @@ void inference_task(void *p1, void *p2, void *p3)
         //loop_model();
         preprocess_data();
         printk("hello from inference_task\n");
+        k_sleep(K_MSEC(1000));
+    }
+}
+
+void display_task(void *p1, void *p2, void *p3)
+{
+    while (1) {
+        bdisplay_loop(dev_display, &display_conf);
+        printk("hello from display_task\n");
         k_sleep(K_MSEC(1000));
     }
 }
