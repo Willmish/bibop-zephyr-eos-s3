@@ -59,16 +59,6 @@ struct TimeCycle
     float dia_2;
 };
 
-struct Features
-{
-    float cycle_len;
-    float t_start_sys;
-    float t_sys_end;
-    float t_sys_dicr;
-    float t_dicr_end;
-    float ratio;
-};
-
 // this is the better algorithm
 std::vector<float> gradient(const std::vector<float> &input)
 {
@@ -202,7 +192,7 @@ Features extract_features(const std::vector<float> &ppg, const std::vector<float
 /* Reads one period of samples from the global buffer.
  * Then extracts features from the data and puts it in
  * a buffer that is passed to the model for inference. */
-void preprocess_data()
+Features preprocess_data()
 {
     ppg_i.reserve(FS);
     ppg_ii.reserve(FS);
@@ -250,4 +240,6 @@ void preprocess_data()
     ftrs.t_sys_dicr = (ftrs.t_sys_dicr - DATA_MEANS[3]) / DATA_STDDEVS[3];
     ftrs.t_dicr_end = (ftrs.t_dicr_end - DATA_MEANS[4]) / DATA_STDDEVS[4];
     ftrs.ratio = (ftrs.ratio - DATA_MEANS[5]) / DATA_STDDEVS[5];
+
+    return ftrs;
 }

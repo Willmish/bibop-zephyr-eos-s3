@@ -33,6 +33,6 @@ void bibop_get_mapped_values(const struct device * const sensor_max, struct sens
         //    printf("Place yo finger on the sensor!\n");
         //    return;
         //}
-        printf("IR=%d %d\n", ir->val1, ir->val2);
-        printf("RED=%d %d\n", red->val1, red->val2);
+        //printf("IR=%d %d\n", ir->val1, ir->val2);
+        //printf("RED=%d %d\n", red->val1, red->val2);
 }

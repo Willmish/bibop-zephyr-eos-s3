@@ -70,7 +70,7 @@ void setup_model(void)
 
 /* TODO: this needs to be supercharged to do the preprocessing of the data, probably should have reading from the main buffer */
 /* Right now puts a dummy buffer of 6 features to the model */
-void loop_model(void)
+Inferred loop_model(void)
 {
 	/* Calculate an x value to feed into the model. We compare the current
 	 * inference_count to the number of inferences per cycle to determine
@@ -105,7 +105,7 @@ void loop_model(void)
 	TfLiteStatus invoke_status = interpreter->Invoke();
 	if (invoke_status != kTfLiteOk) {
 		TF_LITE_REPORT_ERROR(error_reporter, "Invoke failed\n");
-		return;
+		return { 0.f, 0.f };
 	}
 
 	/* Obtain the quantized output from model's output tensor */
@@ -127,4 +127,6 @@ void loop_model(void)
 	 */
 	inference_count += 1;
 	//if (inference_count >= kInferencesPerCycle) inference_count = 0;
+
+    return { sbp, dbp };
 }

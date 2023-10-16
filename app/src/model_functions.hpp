@@ -1,6 +1,8 @@
 #ifndef BIBOP_ZEPHYR_EOS_S3_APP_MODEL_FUNCTIONS_H_
 #define BIBOP_ZEPHYR_EOS_S3_APP_MODEL_FUNCTIONS_H_
 
+#include "common.hpp"
+
 /* Expose a C friendly interface for main functions. */
 #ifdef __cplusplus
 extern "C" {
@@ -14,7 +16,7 @@ extern "C" {
      *  * repeatedly from the application code. The name needs to be loop() for Arduino
      *   * compatibility.
      *    */
-    void loop_model(void);
+    Inferred loop_model(void);
 
 #ifdef __cplusplus
 }
