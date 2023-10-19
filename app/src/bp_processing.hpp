@@ -1,22 +1,15 @@
 #ifndef BIBOP_ZEPHYR_EOS_S3_APP_BP_PROCESSING_H_
 #define BIBOP_ZEPHYR_EOS_S3_APP_BP_PROCESSING_H_
 
+#include "common.hpp"
+#include <stdint.h>
+
 /* Expose a C friendly interface for main functions. */
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct
-{
-    float cycle_len;
-    float t_start_sys;
-    float t_sys_end;
-    float t_sys_dicr;
-    float t_dicr_end;
-    float ratio;
-} Features;
-
-Features preprocess_data();
+Features preprocess_data(int8_t *input);
 
 #ifdef __cplusplus
 }

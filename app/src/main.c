@@ -69,7 +69,7 @@ K_FIFO_DEFINE(display_fifo);
 
 #define SENSOR_DATA_FIFO_SIZE 200
 
-static int32_t processing_fifo_buffer[SENSOR_DATA_FIFO_SIZE];
+static int8_t processing_fifo_buffer[SENSOR_DATA_FIFO_SIZE];
 static int16_t processing_fifo_idx;
 
 static Features extracted_features;
@@ -144,6 +144,7 @@ int init_main() {
 // adjust scaling of the data and ensure that proper data is printed on the screen
 // as of now just display BP on the screen and maybe some other value (HR?)
 // solder it and just have a small box powered by USB
+// TODO: v3 add waking up with the user button
 void sensor_task(void *p1, void *p2, void *p3)
 {
     // IR is RED due to bug in the HW
@@ -152,7 +153,7 @@ void sensor_task(void *p1, void *p2, void *p3)
         //printk("hello from sensor_task\n");
         bibop_get_mapped_values(sensor_max, &ir, &red);
 
-        processing_fifo_buffer[processing_fifo_idx++] = red.val2;
+        processing_fifo_buffer[processing_fifo_idx++] = (int8_t)red.val2;
 
         if (processing_fifo_idx == SENSOR_DATA_FIFO_SIZE)
         {
@@ -168,15 +169,17 @@ void inference_task(void *p1, void *p2, void *p3)
 {
     while (1) {
         printk("hello from inference_task\n");
-        int32_t *processing_buffer = k_fifo_get(&processing_fifo, K_FOREVER);
+        int8_t *processing_buffer = k_fifo_get(&processing_fifo, K_FOREVER);
         // TODO: right now nothing is done with this data - FIX IT
+        for (int i = 0; i < 32; ++i)
+            printf("%d\n", processing_buffer[i]);
 
         // TODO: for now preprocess_data expects floats - rescale int32_t to floats?
-        extracted_features = preprocess_data();
+        extracted_features = preprocess_data(processing_buffer);
 
         // TODO: for now don't run the model
         // loop_model(extracted_features) and adjust the code
-        inferred_data = loop_model();
+        inferred_data = loop_model(&extracted_features);
         k_fifo_put(&display_fifo, &inferred_data);
 
         k_sleep(K_MSEC(1000));
@@ -190,7 +193,7 @@ void display_task(void *p1, void *p2, void *p3)
         // TODO: display live data, for now just wait until re-drawing with new
         Inferred *inferred = (Inferred *) k_fifo_get(&display_fifo, K_FOREVER);
         printk("hello from display_task\n");
-        sprintf(buf, "SBP: %f\nDBP: %f\n", inferred->sbp, inferred->dbp);
+        sprintf(buf, "SBP: %.1f\nDBP: %.1f\n", inferred->sbp, inferred->dbp);
 
         //bdisplay_loop(dev_display, &display_conf);
         bdisplay_writetext(dev_display, &display_conf, buf);

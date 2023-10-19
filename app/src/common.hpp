@@ -3,6 +3,16 @@
 
 typedef struct
 {
+    float cycle_len;
+    float t_start_sys;
+    float t_sys_end;
+    float t_sys_dicr;
+    float t_dicr_end;
+    float ratio;
+} Features;
+
+typedef struct
+{
     float sbp;
     float dbp;
 } Inferred;

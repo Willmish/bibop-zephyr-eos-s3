@@ -70,7 +70,7 @@ void setup_model(void)
 
 /* TODO: this needs to be supercharged to do the preprocessing of the data, probably should have reading from the main buffer */
 /* Right now puts a dummy buffer of 6 features to the model */
-Inferred loop_model(void)
+Inferred loop_model(Features *ftrs)
 {
 	/* Calculate an x value to feed into the model. We compare the current
 	 * inference_count to the number of inferences per cycle to determine

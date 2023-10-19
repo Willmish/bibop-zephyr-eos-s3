@@ -16,7 +16,7 @@ extern "C" {
      *  * repeatedly from the application code. The name needs to be loop() for Arduino
      *   * compatibility.
      *    */
-    Inferred loop_model(void);
+    Inferred loop_model(Features *ftrs);
 
 #ifdef __cplusplus
 }
