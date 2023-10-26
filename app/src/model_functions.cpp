@@ -81,25 +81,35 @@ Inferred loop_model(Features *ftrs)
 	//		 static_cast < float > (kInferencesPerCycle);
 	//float x = position * kXrange;
 
+    /* LEAVE it out as muzeum
     static float buf[6] = { 0.34314155, -0.02509177, 0.43447335, 0.74105764, 0.32367285, 1.66480085 };
     static int8_t scaled_buf[6] = { };
-	/* Quantize the input from floating-point to integer */
+	// Quantize the input from floating-point to integer
     for (int i = 0; i < 6; ++i)
         scaled_buf[i] = buf[i] / input->params.scale + input->params.zero_point;
+    */
+
+    static Features scaled_ftrs;
+    scaled_ftrs.cycle_len = ftrs->cycle_len / input->params.scale * input->params.zero_point;
+    scaled_ftrs.t_start_sys = ftrs->t_start_sys / input->params.scale * input->params.zero_point;
+    scaled_ftrs.t_sys_end = ftrs->t_sys_end / input->params.scale * input->params.zero_point;
+    scaled_ftrs.t_sys_dicr = ftrs->t_sys_dicr / input->params.scale * input->params.zero_point;
+    scaled_ftrs.t_dicr_end = ftrs->t_dicr_end / input->params.scale * input->params.zero_point;
+    scaled_ftrs.ratio = ftrs->ratio / input->params.scale * input->params.zero_point;
 
 	//int8_t x_quantized = x / input->params.scale + input->params.zero_point;
 	///* Place the quantized input in the model's input tensor */
-	input->data.int8[0] = scaled_buf[0];
-	input->data.int8[1] = scaled_buf[1];
-	input->data.int8[2] = scaled_buf[2];
-	input->data.int8[3] = scaled_buf[3];
-	input->data.int8[4] = scaled_buf[4];
-	input->data.int8[5] = scaled_buf[5];
+	input->data.int8[0] = scaled_ftrs.cycle_len;
+	input->data.int8[1] = scaled_ftrs.t_start_sys;
+	input->data.int8[2] = scaled_ftrs.t_sys_end;
+	input->data.int8[3] = scaled_ftrs.t_sys_dicr;
+	input->data.int8[4] = scaled_ftrs.t_dicr_end;
+	input->data.int8[5] = scaled_ftrs.ratio;
 
     TF_LITE_REPORT_ERROR(error_reporter, "scale: %f zp: %d\n", input->params.scale, input->params.zero_point);
     TF_LITE_REPORT_ERROR(error_reporter, "Model input: %x %x %x %x %x %x\n",
-                        scaled_buf[0], scaled_buf[1], scaled_buf[2],
-                        scaled_buf[3], scaled_buf[4], scaled_buf[5]);
+                        scaled_ftrs.cycle_len, scaled_ftrs.t_start_sys, scaled_ftrs.t_sys_end,
+                        scaled_ftrs.t_sys_dicr, scaled_ftrs.t_dicr_end, scaled_ftrs.ratio);
 
 	/* Run inference, and report any error */
 	TfLiteStatus invoke_status = interpreter->Invoke();
