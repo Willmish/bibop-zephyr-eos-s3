@@ -68,8 +68,12 @@ K_FIFO_DEFINE(processing_fifo);
 K_FIFO_DEFINE(display_fifo);
 
 #define SENSOR_DATA_FIFO_SIZE 200
+#define SAMPLING_RATE_HZ 200
+#define PROCESSING_RATE_HZ 125
+#define DOWNSAMPLE_FACTOR (SAMPLING_RATE_HZ/PROCESSING_RATE_HZ)
 
 static int8_t processing_fifo_buffer[SENSOR_DATA_FIFO_SIZE];
+static int32_t downsampled_sample;
 static int16_t processing_fifo_idx;
 
 static Features extracted_features;
@@ -149,16 +153,30 @@ void sensor_task(void *p1, void *p2, void *p3)
 {
     // IR is RED due to bug in the HW
     struct sensor_value ir, red;
+    int8_t sample_count = 0;
     while (1) {
         //printk("hello from sensor_task\n");
         bibop_get_mapped_values(sensor_max, &ir, &red);
 
-        processing_fifo_buffer[processing_fifo_idx++] = (int8_t)red.val2;
+        ++sample_count;
+        downsampled_sample += (int8_t)red.val2;
 
-        if (processing_fifo_idx == SENSOR_DATA_FIFO_SIZE)
+        // perform an averaging of 2 adjacent samples (should be 1.6 sample in an ideal world,
+        // but that would require upsampling and downsampling)
+        // instead we simply feed the buffer slightly slower
+        // TODO: check if this shouldn't be done using semaphores (else we starve the inference task)
+        if (sample_count >= DOWNSAMPLE_FACTOR)
         {
-            k_fifo_put(&processing_fifo, &processing_fifo_buffer);
-            processing_fifo_idx = 0u;
+            processing_fifo_buffer[processing_fifo_idx++] = (int8_t)(downsampled_sample / DOWNSAMPLE_FACTOR);
+
+            downsampled_sample = 0;
+            sample_count = 0;
+
+            if (processing_fifo_idx == SENSOR_DATA_FIFO_SIZE)
+            {
+                k_fifo_put(&processing_fifo, &processing_fifo_buffer);
+                processing_fifo_idx = 0u;
+            }
         }
 
         k_sleep(K_MSEC(SENSOR_TASK_MS));
